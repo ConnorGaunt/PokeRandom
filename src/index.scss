@@ -1,0 +1,403 @@
+:root{
+    --text-color: #fff;
+    --white: #fff;
+    --shadow-white: rgb(71, 80, 124);
+    --bg-color: #010108;
+    --shadow: rgba(0, 0, 0, 0.5);
+    --dark-blue: #020313;
+    --blue: #0d1b2a;
+    --steel: rgb(8, 29, 47);
+    --accent-purple: rgb(6, 15, 61);
+    --accent: rgb(25, 253, 173);
+}
+
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body{
+  font-size: 16px;
+  font-family: 'Roboto', 'helvetica', sans-serif;
+}
+
+main{
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    background-color: var(--bg-color);
+}
+
+.sidebar{
+  width: 100%;
+  max-width: 300px;
+  background-color: var(--dark-blue);
+  position: relative;
+  z-index: 5;
+  color: var(--text-color);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+
+  h1{
+    text-align: center;
+  }
+
+  &__top{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .num-of-pokemon{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+.pokemon-wheel{
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  position: relative;
+
+  &:not(.green-screen){
+    background: radial-gradient(circle, var(--accent-purple) 0%, rgba(2, 6, 19, 0.5) 90%);
+    box-shadow: inset 0 0 100px var(--shadow);
+  }
+
+  &.green-screen{
+    background: limegreen;
+  }
+
+  &.hide-columns .wheel-column{
+    border-right: 0 !important;
+    box-shadow: none;
+  }
+  &.hide-dex .pokemon-grid__item__info__dex{
+    display: none !important;
+  }
+  &.hide-name .pokemon-grid__item__info__name{
+    display: none !important;
+  }
+  &.hide-pokemon-bg .pokemon-grid__item{
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .loader{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 10;
+
+    &__top{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 50%;
+        background: #ff4343;
+        transform: translateY(calc(-100% - 50px));
+        z-index: 1;
+
+      box-shadow: 0px 5px 5px var(--shadow);
+
+      svg{
+        width: 100px;
+        height: 100px;
+        z-index: 2;
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translate(-50%, 50%);
+        filter: drop-shadow( 0px 0px 10px rgba(0, 0, 0, .4));
+      }
+    }
+
+    &__bottom{
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: #ededed;
+      transform: translateY(calc(100% + 50px));
+    }
+  }
+}
+
+.wheel-column{
+    display: grid;
+    gap: 1rem;
+    width: 100%;
+    justify-content: center;
+    position: relative;
+    border-right: 5px solid var(--shadow-white);
+    height: fit-content;
+    border-top: 0;
+    border-bottom: 0;
+    box-shadow: -10px 0 10px -5px var(--shadow), 10px 0 10px -5px var(--shadow);
+    padding: 0 15px;
+
+    &:last-of-type{
+      border-right: none;
+    }
+
+    &.finished{
+    .pokemon-grid__item:not(.show){
+      img{
+        filter: brightness(0.3) contrast(1.5);
+      }
+    }
+  }
+
+    .pokemon-grid__item{
+      max-width: 600px;
+      aspect-ratio: 1/1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      border-radius: 20px;
+      box-shadow: 0px 0px 0px 0px var(--shadow);
+      transition: background 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+      z-index: 1;
+
+      img{
+        width: 90%;
+        aspect-ratio: 1/1;
+        object-fit: contain;
+        object-position: center;
+        height: auto;
+        filter:  brightness(1) contrast(1.5);
+        transition: filter 0.3s ease-in-out;
+        padding: 10px;
+      }
+
+      &__info{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        padding: 0px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        container-type: inline-size;
+
+        p {
+          color: var(--white);
+          padding: max(10px, 3cqi);
+          text-shadow: 0px 0px 10px var(--shadow);
+        }
+
+        &__dex{
+          font-size: clamp(3.5cqi, 4cqi, 6cqi);
+        }
+        &__name{
+          font-size: 5.5cqi;
+        }
+      }
+
+      &.show{
+        box-shadow: 0px 0px 20px -5px var(--shadow);
+        background: radial-gradient(circle, var(--steel) 0%, var(--dark-blue) 100%);
+
+        img{
+          filter: brightness(1) contrast(1.5);
+        }
+
+        .pokemon-grid__item__info{
+          opacity: 1;
+        }
+      }
+    }
+}
+
+button{
+  appearance: none;
+  border: 4px solid var(--accent);
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  border-radius: 1rem;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+
+  svg{
+    fill: var(--accent);
+    width: 30px;
+    height: 30px;
+    transition: fill 0.3s ease-in-out;
+  }
+
+  span{
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1.25rem;
+    transition: color 0.3s ease-in-out;
+  }
+
+  &:hover{
+    background: var(--accent);
+    border-color: var(--accent);
+    svg{
+      fill: var(--dark-blue);
+    }
+    span{
+      color: var(--dark-blue);
+    }
+  }
+
+}
+
+
+.number-selector{
+  display: flex;
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+    overflow: hidden;
+
+  span{
+    color: var(--accent);
+    font-size: 1.5rem;
+    font-weight: 700;
+    width: 100%;
+    text-align: center;
+    padding: 0 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-right: 2px solid var(--accent);
+    aspect-ratio: 1/1;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+
+    &:last-child{
+      border-right: 0;
+    }
+
+    &:hover{
+      //background: var(--accent);
+      color: var(--white);
+    }
+
+    &.active{
+        background: var(--accent);
+        color: var(--dark-blue);
+    }
+  }
+}
+
+.select-container{
+  width: 100%;
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  position: relative;
+
+  select{
+    appearance: none;
+    width: 100%;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+
+    option{
+      color: var(--bg-color);
+    }
+  }
+
+  svg{
+    width: 25px;
+    height: 25px;
+    transition: fill 0.3s ease-in-out;
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+
+    path{
+      stroke: var(--accent);
+    }
+  }
+}
+
+.settings-container{
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.settings{
+  display: flex;
+  flex-direction: column;
+    gap: 0.45rem;
+}
+
+.checkbox-container{
+
+
+  label{
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+
+    span:not(.checkbox-container__toggle){
+      transform: translateY(3px);
+    }
+  }
+
+  &__toggle{
+    width: 50px;
+    min-width: 50px;
+    height: 25px;
+    background: var(--blue);
+    border-radius: 25px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+
+    &::before{
+      content: '';
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      background: #3c5066;
+      border-radius: 50%;
+      transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+    }
+  }
+
+  input[type="checkbox"]{
+    display: none;
+
+    &:checked + label .checkbox-container__toggle::before{
+      background: var(--accent);
+      transform: translateX(100%);
+    }
+  }
+}
