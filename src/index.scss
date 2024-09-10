@@ -151,6 +151,10 @@ main{
     box-shadow: -10px 0 10px -5px var(--shadow), 10px 0 10px -5px var(--shadow);
     padding: 0 15px;
 
+    &.is-spinning{
+        animation: spin 1s linear infinite;
+    }
+
     &:last-of-type{
       border-right: none;
     }
@@ -399,5 +403,13 @@ button{
       background: var(--accent);
       transform: translateX(100%);
     }
+  }
+}
+
+
+
+@keyframes spin {
+  to {
+    transform: translateY(-100%);
   }
 }
