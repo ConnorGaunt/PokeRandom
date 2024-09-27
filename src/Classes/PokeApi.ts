@@ -30,8 +30,7 @@ export default class PokeApi {
     }
 
     async get_pokedex(name: string) {
-        const resp = await this.poke_api.getPokedexByName(name);
-        this.selected_pokedex = resp;
+        this.selected_pokedex = await this.poke_api.getPokedexByName(name);
     }
 
     get_pokemon_from_pokedex() {
@@ -39,7 +38,7 @@ export default class PokeApi {
             console.error('No pokedex selected');
             return;
         }
-        console.log(this.selected_pokedex.pokemon_entries);
+        // console.log(this.selected_pokedex.pokemon_entries);
         return this.selected_pokedex.pokemon_entries;
     }
 

@@ -102,7 +102,7 @@ export default class CanvasWheel implements CanvasType {
                 // console.log(random_selected_item);
                 setTimeout(() => {
                     requestAnimationFrame(this.do_after_move.bind(this, () => {
-                        console.log('finished');
+                        // console.log('finished');
                         this.is_spinning = 0;
                         if (this.featured_item !== null){
                             this.featured_item.setFeatured(true);
@@ -216,8 +216,7 @@ export default class CanvasWheel implements CanvasType {
         // Works backwards from the target to the top of the list
         for(let i = target -1; i >= 0; i--) {
             let temp = target - i;
-            let target_y = middle_of_screen - (distance_to_move * temp);
-            this.items[i].target_y = target_y;
+            this.items[i].target_y = middle_of_screen - (distance_to_move * temp);
         }
 
         // Sets the target to the middle of the screen
@@ -229,8 +228,7 @@ export default class CanvasWheel implements CanvasType {
         let counter = 0;
         for(let i = target + 1; i < this.items.length; i++) {
             counter++;
-            let target_y = middle_of_screen + (distance_to_move * counter);
-            this.items[i].target_y = target_y;
+            this.items[i].target_y = middle_of_screen + (distance_to_move * counter);
         }
 
         if(instant) {

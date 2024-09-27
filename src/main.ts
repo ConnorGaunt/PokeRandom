@@ -192,7 +192,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     function should_hide_loader(){
 
-        console.log('checking should_hide_loader');
+        // console.log('checking should_hide_loader');
 
         if(pokemon_entries?.length === 0){
             wheels_container.classList.remove('spin');
