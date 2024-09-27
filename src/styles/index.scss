@@ -61,12 +61,12 @@ main{
   }
 }
 
-.pokemon-wheel{
+#pokemon-wheel{
   height: 100%;
   width: 100%;
   overflow: hidden;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
 
   &:not(.green-screen){
@@ -78,19 +78,17 @@ main{
     background: limegreen;
   }
 
-  &.hide-columns .wheel-column{
-    border-right: 0 !important;
-    box-shadow: none;
+  canvas{
+    border-left: 4px solid rgba(255, 255, 255, 0.02);
+    &:first-child{
+      border-left: 0;
+    }
   }
-  &.hide-dex .pokemon-grid__item__info__dex{
-    display: none !important;
-  }
-  &.hide-name .pokemon-grid__item__info__name{
-    display: none !important;
-  }
-  &.hide-pokemon-bg .pokemon-grid__item{
-    background: transparent !important;
-    box-shadow: none !important;
+
+  &.hide-cols{
+    canvas{
+      border: 0;
+    }
   }
 
   .loader{
@@ -109,20 +107,22 @@ main{
         width: 100%;
         height: 50%;
         background: #ff4343;
-        transform: translateY(calc(-100% - 50px));
+        transform: translateY(calc(-100% - 75px));
         z-index: 1;
 
       box-shadow: 0px 5px 5px var(--shadow);
+      transition: transform 0.3s ease-in-out;
 
       svg{
-        width: 100px;
-        height: 100px;
+        width: 150px;
+        height: 150px;
         z-index: 2;
         position: absolute;
         bottom: 0;
         left: 50%;
-        transform: translate(-50%, 50%);
+        transform: translate(-50%, 50%) rotate(0deg);
         filter: drop-shadow( 0px 0px 10px rgba(0, 0, 0, .4));
+        //transition: transform 1s ease-in-out;
       }
     }
 
@@ -133,9 +133,30 @@ main{
       width: 100%;
       height: 50%;
       background: #ededed;
-      transform: translateY(calc(100% + 50px));
+      transform: translateY(calc(100% + 75px));
+      transition: transform 0.3s ease-in-out;
     }
   }
+
+  &.is-loading{
+    .loader{
+      &__top{
+        transform: translateY(0px);
+      }
+      &__bottom{
+        transform: translateY(0px);
+      }
+    }
+  }
+
+  &.spin{
+    .loader__top svg{
+      animation: spin 1s ease-in-out;
+      animation-iteration-count: 1;
+    }
+  }
+
+
 }
 
 .wheel-column{
@@ -339,6 +360,7 @@ button{
     top: 50%;
     right: 10px;
     transform: translateY(-50%);
+    pointer-events: none;
 
     path{
       stroke: var(--accent);
@@ -399,5 +421,67 @@ button{
       background: var(--accent);
       transform: translateX(100%);
     }
+  }
+}
+
+.sidebar__dex-select {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.spin-length{
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  input{
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 8px;
+    height: 30px;
+    border: 2px solid var(--accent);
+
+    &::-webkit-slider-runnable-track,
+    &::-moz-range-track {
+      background: transparent;
+      height: 20px;
+    }
+
+    &::-webkit-slider-thumb{
+      -webkit-appearance: none; /* Override default look */
+      appearance: none;
+      background-color: var(--accent);
+      height: 20px;
+      width: 15px;
+      border-radius: 5px;
+      border: 0;
+    }
+
+    &::-webkit-slider-runnable-track {
+      background-color: transparent;
+      border-radius: 5px;
+      height: 20px;
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: translate(-50%, 50%) rotate(0deg);
+  }
+  to{
+    transform: translate(-50%, 50%) rotate(360deg);
+  }
+}
+
+
+@keyframes spin-exit {
+  to{
+    transform: translate(-50%, 50%) rotate(0deg);
   }
 }
