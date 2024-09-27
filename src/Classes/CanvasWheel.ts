@@ -37,9 +37,11 @@ export default class CanvasWheel implements CanvasType {
     featured_item: WheelItem | null = null;
     private is_currently_moving: boolean = false;
     ready:boolean = false;
+    loop_length: number = 1500;
 
     spinning_interval: number | undefined;
     featured_item_index: number | null = null;
+    number_selector: HTMLElement | null;
 
     constructor(
         parent: HTMLElement,
@@ -56,11 +58,15 @@ export default class CanvasWheel implements CanvasType {
         this.total_number_of_wheels = total_number_of_wheels;
         this.wheel_number = wheel_number;
 
+        this.number_selector = document.querySelector('.sidebar .number-selector');
         this.set_size();
         this.setup_event_listeners();
     }
 
     reset_wheel_position(){
+        if(this.featured_item !== null) {
+            this.featured_item.setFeatured(false);
+        }
         this.scrollTo(this.items.length - 3, true);
     }
 
@@ -76,6 +82,7 @@ export default class CanvasWheel implements CanvasType {
     spin(random_selected_item_index: number) {
         this.reset_wheel_position();
         this.is_spinning = 1;
+
 
         this.featured_item_index = random_selected_item_index;
         this.featured_item = this.items[random_selected_item_index];
@@ -97,10 +104,12 @@ export default class CanvasWheel implements CanvasType {
                     requestAnimationFrame(this.do_after_move.bind(this, () => {
                         console.log('finished');
                         this.is_spinning = 0;
-
+                        if (this.featured_item !== null){
+                            this.featured_item.setFeatured(true);
+                        }
                     }));
                 }, 500);
-            }, 5500);
+            }, this.loop_length);
 
         }
 
@@ -119,8 +128,11 @@ export default class CanvasWheel implements CanvasType {
             });
     }
 
-    set_size() {
-        this.width = this.parent_element.clientWidth / this.total_number_of_wheels;
+    set_size(has_border = true) {
+
+        const offset = has_border ? 4 : 0;
+
+        this.width = (this.parent_element.clientWidth / this.total_number_of_wheels) - offset;
         this.height = this.parent_element.clientHeight;
 
         this.element.width = this.width;
@@ -237,6 +249,10 @@ export default class CanvasWheel implements CanvasType {
         }
     }
 
+    set_spin_length(length: number){
+        this.loop_length = length;
+    }
+
     check_ready() {
         if(!this.ready){
             let amount_ready = 0;
@@ -245,8 +261,8 @@ export default class CanvasWheel implements CanvasType {
                     amount_ready++;
                 }
             }
-            const percent_ready = Math.floor((100 / this.items.length) * amount_ready);
-            console.log( percent_ready + '%');
+            // const percent_ready = Math.floor((100 / this.items.length) * amount_ready);
+            // console.log( percent_ready + '%');
             if(amount_ready === this.items.length){
                 this.ready = true;
             }else{

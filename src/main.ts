@@ -7,6 +7,7 @@ import {
     format_name,
     get_random_int
 } from "./extras/utils.ts";
+import {PokemonEntry} from "pokeapi-js-wrapper";
 
 window.addEventListener('DOMContentLoaded', async () => {
     console.clear();
@@ -15,13 +16,19 @@ window.addEventListener('DOMContentLoaded', async () => {
     const random_button = u('#randomize-button');
     const pokedex_select = u('#pokedex-selector');
     const number_of_wheels_buttons = u('.number-selector span');
-    let number_of_wheels = 3;
+    const use_green_screen = u('#green-screen');
+    const hide_columns = u('#hide-columns');
+    const spin_length = u('#spin-length');
+    const spin_length_text = u('span.spin-length-text');
+    let number_of_wheels = 6;
     let wheels: CanvasWheel[] = [];
 
     const poke_api = new PokeApi();
     await poke_api.get_pokedexs();
-    await poke_api.get_pokedex('paldea');
-    let pokemon_entries = poke_api.get_pokemon_from_pokedex();
+    let pokemon_entries: PokemonEntry[] | undefined;
+    let loading_interval: any = null;
+    const loader_anim_length = 300;
+    const loader_spin_length = 1100;
 
     // const randomly_selected_pokemon = [];
     // for (let i = 0; i < 6; i++) {
@@ -31,13 +38,34 @@ window.addEventListener('DOMContentLoaded', async () => {
     // }
 
 
-    // console.log(randomly_selected_pokemon);
-    generate_wheels();
+    const show_loader = () => {
+        wheels_container.classList.add('is-loading');
+        setTimeout(() => {
+            wheels_container.classList.add('spin');
+            loading_interval = setInterval(() => {
+                wheels_container.classList.remove('spin');
+                setTimeout(() => {
+                    wheels_container.classList.add('spin');
+                }, 100);
+            }, loader_spin_length);
+        }, loader_anim_length);
+    }
+
+    const hide_loader = () => {
+        clearInterval(loading_interval)
+        setTimeout(() => {
+            wheels_container.classList.remove('is-loading');
+            wheels_container.classList.remove('spin');
+        }, loader_spin_length);
+    }
+
 
     function generate_wheels(){
-        wheels_container.innerHTML = '';
+        wheels_container.querySelectorAll('canvas').forEach(w => {
+            w.remove();
+        })
         wheels = [];
-        if(pokemon_entries !== undefined) {
+        if(pokemon_entries !== undefined && pokemon_entries.length > 0) {
             for(let i = 0; i < number_of_wheels; i++) {
                 const wheel = new CanvasWheel(
                     wheels_container,
@@ -64,7 +92,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    pokedex_select.html('');
+    pokedex_select.html('<option value="">Select a Pokedex</option>');
     for (let i = 0; i < poke_api.pokedexs.length; i++) {
         const pokedex = poke_api.pokedexs[i];
         const option = document.createElement('option');
@@ -74,10 +102,19 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 
     pokedex_select.on('change', async () => {
-        const selected_pokedex_name = pokedex_select.first().value;
-        await poke_api.get_pokedex(selected_pokedex_name);
-        pokemon_entries = poke_api.get_pokemon_from_pokedex();
-        generate_wheels();
+        show_loader();
+        setTimeout(async () => {
+            // @ts-ignore
+            const selected_pokedex_name = pokedex_select.first().value;
+            if(selected_pokedex_name !== ''){
+                await poke_api.get_pokedex(selected_pokedex_name);
+                pokemon_entries = poke_api.get_pokemon_from_pokedex();
+            } else {
+                pokemon_entries = [];
+            }
+            generate_wheels();
+            requestAnimationFrame(should_hide_loader);
+        }, loader_anim_length)
     });
 
     number_of_wheels_buttons.each((button) => {
@@ -86,12 +123,16 @@ window.addEventListener('DOMContentLoaded', async () => {
             b.classList.add('active');
         }
         b.addEventListener('click', () => {
-            number_of_wheels_buttons.each((_button) => {
-                _button.classList.remove('active');
-            });
-            b.classList.add('active');
-            number_of_wheels = parseInt(b.dataset.activeNumber!.toString());
-            generate_wheels();
+            show_loader();
+            setTimeout(async () => {
+                requestAnimationFrame(should_hide_loader);
+                number_of_wheels_buttons.each((_button) => {
+                    _button.classList.remove('active');
+                });
+                b.classList.add('active');
+                number_of_wheels = parseInt(b.dataset.activeNumber!.toString());
+                generate_wheels();
+            }, loader_anim_length)
         });
     })
 
@@ -113,6 +154,69 @@ window.addEventListener('DOMContentLoaded', async () => {
             }, wheel.wheel_number * 200);
         });
     })
+
+
+    use_green_screen.on('change', (e)=> {
+        const target = e.target as HTMLInputElement;
+        if(target.checked){
+            wheels_container.classList.add('green-screen');
+        } else {
+            wheels_container.classList.remove('green-screen');
+        }
+    });
+    hide_columns.on('change', (e) => {
+        const target = e.target as HTMLInputElement;
+        if(target.checked){
+            wheels_container.classList.add('hide-cols');
+            wheels.forEach(wheel => {
+                wheel.set_size(false)
+            })
+        } else {
+            wheels_container.classList.remove('hide-cols');
+            wheels.forEach(wheel => {
+                wheel.set_size()
+            })
+        }
+    });
+
+
+    spin_length.on(['change', 'input'], (e) => {
+        const target = e.target as HTMLInputElement;
+        const value = parseInt(target.value);
+        spin_length_text.text((value / 1000).toFixed(1).replace('.0', ''));
+        wheels.forEach(wheel => {
+            wheel.set_spin_length(value);
+        })
+    })
+
+
+    function should_hide_loader(){
+
+        console.log('checking should_hide_loader');
+
+        if(pokemon_entries?.length === 0){
+            wheels_container.classList.remove('spin');
+            clearInterval(loading_interval);
+            requestAnimationFrame(should_hide_loader);
+            return;
+        }
+
+        if(loading_interval !== null){
+            const ready_wheels = wheels.map(r=>r).filter(w => w.ready).length;
+            if(ready_wheels !== number_of_wheels){
+                requestAnimationFrame(should_hide_loader);
+                return;
+            }
+            hide_loader();
+        }
+    }
+
+    requestAnimationFrame(should_hide_loader);
+
+
+
+    // console.log(randomly_selected_pokemon);
+    generate_wheels();
 
 });
 
